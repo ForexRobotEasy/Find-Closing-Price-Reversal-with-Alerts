@@ -1,0 +1,69 @@
+
+//+------------------------------------------------------------------+
+//|                            Expert name                            |
+//|     Find Closing Price Reversal with Alerts                        |
+//|               Developer's site: forexroboteasy.com                |
+//|                  Development: Forex Robot Easy Team               |
+//+------------------------------------------------------------------+
+#property copyright 'forexroboteasy.com'
+#property link      'forexroboteasy.com'
+#property version   '1.00'
+#property strict
+#property indicator_chart_window
+
+// Input parameters
+input int gapSize = 5; // Size of the gap in points
+input int barCheckCount = 3; // Number of bars to check for potential reversal pattern
+
+// Global variables
+bool isAlertShown = false; // Flag to prevent multiple alerts
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator deinitialization function                       |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Cleanup
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+void OnCalculate(const int rates_total,
+                 const int prev_calculated,
+                 const datetime &time[],
+                 const double &open[],
+                 const double &high[],
+                 const double &low[],
+                 const double &close[],
+                 const long &tick_volume[],
+                 const long &volume[],
+                 const int &spread[])
+{
+    // Check for potential reversal pattern
+    for (int i = barCheckCount; i < rates_total; i++)
+    {
+        if (MathAbs(close[i - barCheckCount] - open[i - barCheckCount + 1]) >= gapSize * _Point &&
+            open[i] > high[i - 1] &&
+            close[i] < close[i - 1] &&
+            close[i] < low[i])
+        {
+            if (!isAlertShown) // Show alert only once
+            {
+                Alert('Potential reversal pattern detected at bar ', IntegerToString(i));
+                isAlertShown = true;
+            }
+            
+            // Exit the loop after finding the first pattern
+            break;
+        }
+    }
+}
